@@ -42,7 +42,7 @@ https://console.groq.com
 ## 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone <https://github.com/SehlaMehdi/trendly-ai-agent>
 cd trendly-ai-agent
 ```
 
