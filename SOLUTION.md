@@ -2,7 +2,7 @@
 
 # Solution Overview
 
-The Trendly AI Customer Support Assistant is built to help customers with common support queries such as order tracking, returns, exchanges, refunds, shipping, and store policies. Instead of allowing the AI model to answer from its own knowledge, every response is grounded using Trendly's official policy document and the customer's order details. This helps the assistant give consistent and reliable responses while reducing hallucinations.
+The Trendly AI Customer Support Assistant is built to help customers with common support queries such as order tracking, returns, exchanges, refunds, shipping, and store policies. Instead of allowing the AI model to answer from its own knowledge, every response is grounded using Trendly's official policy document and the customer's order details. This helps the assistant give consistent and reliable responses while reducing the hallucinations.
 
 ---
 
