@@ -40,7 +40,7 @@ chatForm.addEventListener('submit', async (e) => {
 
     try {
         // Send request to our Express backend server
-        const response = await fetch('http://localhost:3000/api/chat', {
+        const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -58,7 +58,7 @@ chatForm.addEventListener('submit', async (e) => {
         }
     } catch (error) {
         console.error('Error connecting to backend:', error);
-        loadingDiv.textContent = 'Unable to reach backend server. Please ensure backend is running at http://localhost:3000.';
+        loadingDiv.textContent = 'Unable to reach backend server. Please try again later.';
     }
 });
 
@@ -75,7 +75,7 @@ if (newChatBtn) {
 
         // 2. Tell the backend to clear memory
         try {
-            await fetch('http://localhost:3000/api/clear-chat', {
+            await fetch('/api/clear-chat', {
                 method: 'POST'
             });
             console.log("Chat reset successfully.");
