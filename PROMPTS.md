@@ -140,6 +140,29 @@ Additional guardrails were added for:
 
 ---
 
+## Iteration 6 – Reducing Hallucinations & Improving Response Quality
+
+### Goal
+
+Make the assistant behave more like a real customer support representative by avoiding false assumptions and unrealistic actions.
+
+### Issue
+
+During testing, the assistant occasionally claimed to perform actions that the application could not actually perform, such as adding store credit, creating tickets, contacting the shipping team, or promising future updates. Some responses also became longer than necessary or included information that the customer had not asked for.
+
+### Improvement
+
+Additional instructions were introduced to:
+
+- Never claim to complete backend actions that are not implemented.
+- Explain only what the customer is eligible for according to the Trendly policy.
+- Avoid making false assumptions about refunds, replacements, tickets, or shipping investigations.
+- Keep responses short and focused on the customer's immediate question.
+- Use more natural customer support language instead of robotic phrases.
+- Limit conversation history to recent messages to maintain context while reducing unnecessary token usage and improving response speed.
+
+---
+
 # Final Prompt Design
 
 The final prompt was designed around five principles:
@@ -181,3 +204,4 @@ Some of the key learnings were:
 - Maintaining conversation context creates a much more natural user experience.
 - Security and privacy guardrails should be built into the system from the beginning.
 - Thorough edge-case testing is just as important as testing normal customer conversations.
+- Testing with real customer scenarios helped identify hallucinations and improve the assistant's overall reliability.

@@ -4,10 +4,13 @@ An AI-powered customer support assistant built for Trendly. The assistant helps 
 
 ---
 
-# 🔗 Live Demo
+# 🔗 Project Links
 
-**Application:** https://trendly-ai-agent.onrender.com
+**Live Application:** https://trendly-ai-agent.onrender.com
 
+**Demo Video:** https://drive.google.com/drive/folders/1omKANiIop7mJy6jw3zlO09eETO4p77MD?usp=sharing
+
+**GitHub Repository:** https://github.com/SehlaMehdi/trendly-ai-agent
 ---
 
 # 🚀 Getting Started
@@ -77,7 +80,7 @@ http://localhost:3000
 ### AI
 
 - Groq API
-- Llama 3.3 70B Versatile
+- Llama 3.1 8B Instant
 
 ---
 
