@@ -7,6 +7,24 @@ require('dotenv').config({ path: path.join(__dirname, '../.env') });
 
 const chatRoutes = require('./routes/chatRoutes');
 
+// Safely locate and load groqService to prevent module-not-found crashes
+let groqService;
+const possiblePaths = [
+    './groqService', 
+    './services/groqService', 
+    '../groqService', 
+    '../services/groqService'
+];
+
+for (const servicePath of possiblePaths) {
+    try {
+        groqService = require(servicePath);
+        break;
+    } catch (err) {
+        // Continue searching if path is not found
+    }
+}
+
 const app = express();
 
 // Middlewares
@@ -19,11 +37,15 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // API Routes
 app.use('/api', chatRoutes);
 
-// --- NEW ENDPOINT TO CLEAR CHAT MEMORY ---
+// --- ENDPOINT TO CLEAR CHAT MEMORY ---
 app.post('/api/clear-chat', (req, res) => {
-    // Note: If your conversation array is actually stored inside `routes/chatRoutes.js`, 
-    // you will also need to add a reset function there. 
-    // This endpoint ensures the frontend gets a successful response when clicking the button.
+    if (groqService) {
+        if (typeof groqService.clearSession === 'function') {
+            groqService.clearSession();
+        } else if (typeof groqService.clearHistory === 'function') {
+            groqService.clearHistory();
+        }
+    }
     res.json({ success: true, message: 'Chat memory cleared' });
 });
 
