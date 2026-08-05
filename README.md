@@ -11,6 +11,7 @@ An AI-powered customer support assistant built for Trendly. The assistant helps 
 **Demo Video:** https://drive.google.com/drive/folders/1omKANiIop7mJy6jw3zlO09eETO4p77MD?usp=sharing
 
 **GitHub Repository:** https://github.com/SehlaMehdi/trendly-ai-agent
+
 ---
 
 # 🚀 Getting Started
