@@ -4,6 +4,10 @@ const dataService = require('./dataService');
 // Initialize Groq client with your API key from environment variables
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
+// Persistent state across conversation turns for the active session
+let conversationHistory = [];
+let activeOrderId = null;
+
 // Generates system instructions embedding store policy with Domain Boundary Guardrails
 function getSystemInstruction() {
     const policyText = dataService.getPolicyText();
@@ -54,40 +58,60 @@ CONVERSATION DESIGN & BEHAVIOR RULES (FOLLOW STRICTLY):
 // Main function to process customer messages
 async function generateSupportResponse(userMessage) {
     try {
-        // Look for order IDs matching pattern TR-XXXX (e.g. TR-4521)
+        // 1. Check if the user mentioned a new order ID in this message (e.g., TR-4521)
         const orderMatch = userMessage.match(/TR-\d{4}/i);
+        if (orderMatch) {
+            activeOrderId = orderMatch[0].toUpperCase();
+        }
+
         let orderContextNote = "";
 
-        if (orderMatch) {
-            const orderId = orderMatch[0].toUpperCase();
-            const orderDetails = dataService.getOrderById(orderId);
-
+        // 2. If an active order exists in the session, automatically inject its JSON data 
+        //    so the AI doesn't lose context across multi-turn prompts (e.g., "Can I return it?")
+        if (activeOrderId) {
+            const orderDetails = dataService.getOrderById(activeOrderId);
             if (orderDetails) {
-                orderContextNote = `\n[SYSTEM Context: Customer queried Order ${orderId}: ${JSON.stringify(orderDetails)}]`;
+                orderContextNote = `\n[SYSTEM Context: Active Order ${activeOrderId} data: ${JSON.stringify(orderDetails)}]`;
             } else {
-                orderContextNote = `\n[SYSTEM Context: Customer queried Order ${orderId}, but no matching record exists in orders.json.]`;
+                orderContextNote = `\n[SYSTEM Context: Customer queried Order ${activeOrderId}, but no matching record exists in orders.json.]`;
             }
         }
 
-        const fullPrompt = userMessage + orderContextNote;
+        const enrichedUserPrompt = userMessage + orderContextNote;
 
-        // Call Groq API using Llama 3.3 70B
+        // 3. Append the user turn to history
+        conversationHistory.push({ role: "user", content: enrichedUserPrompt });
+
+        // 4. Call Groq API using Llama 3.3 70B with full message history for true multi-turn memory
         const chatCompletion = await groq.chat.completions.create({
             messages: [
                 { role: "system", content: getSystemInstruction() },
-                { role: "user", content: fullPrompt }
+                ...conversationHistory
             ],
             model: "llama-3.3-70b-versatile",
             temperature: 0.3
         });
 
-        return chatCompletion.choices[0]?.message?.content || "I apologize, but I could not process your request right now.";
+        const assistantReply = chatCompletion.choices[0]?.message?.content || "I apologize, but I could not process your request right now.";
+
+        // 5. Append assistant reply to history so future turns retain context
+        conversationHistory.push({ role: "assistant", content: assistantReply });
+
+        return assistantReply;
+
     } catch (error) {
         console.error("Groq API Error:", error);
         return "I apologize, but I encountered an issue accessing your details. Please connect with our team directly at support@trendly.com and we'll get this sorted out for you.";
     }
 }
 
+// Optional helper linked to your /api/clear-chat endpoint
+function clearSession() {
+    conversationHistory = [];
+    activeOrderId = null;
+}
+
 module.exports = {
-    generateSupportResponse
+    generateSupportResponse,
+    clearSession
 };

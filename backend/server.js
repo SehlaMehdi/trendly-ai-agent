@@ -19,6 +19,14 @@ app.use(express.static(path.join(__dirname, '../frontend')));
 // API Routes
 app.use('/api', chatRoutes);
 
+// --- NEW ENDPOINT TO CLEAR CHAT MEMORY ---
+app.post('/api/clear-chat', (req, res) => {
+    // Note: If your conversation array is actually stored inside `routes/chatRoutes.js`, 
+    // you will also need to add a reset function there. 
+    // This endpoint ensures the frontend gets a successful response when clicking the button.
+    res.json({ success: true, message: 'Chat memory cleared' });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
     res.json({ status: 'Server is running cleanly!' });

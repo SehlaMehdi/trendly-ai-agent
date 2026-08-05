@@ -1,30 +1,183 @@
-# Prompt Engineering & System Design Log
+# Prompt Engineering
 
-## 1. Prompt Strategy
-The core strategy relies on **Strict Policy Grounding via System Instructions**. By placing the entire trendly_policy.md file inside the model's system instructions, the model treats the policy as absolute truth and avoids generating unauthorized answers.
-
----
-
-## 2. Guardrail Rules Implemented
-- **No Inventions:** Explicitly instructed to refuse answering questions not mentioned in the policy document.
-- **Privacy Assurance:** Prohibits sharing information across different customer accounts.
-- **Financial Security:** Direct directive forbidding the collection of bank accounts, credit cards, or passwords inside chat.
-- **Special Case Routing:** Instructed to route lost parcels (Section 1.6) and policy exceptions directly to human support (support@trendly.com).
+This document summarizes how the prompts for the Trendly AI Customer Support Assistant evolved during development. The primary goal was to transform a general-purpose LLM into a reliable customer support assistant that responds naturally while remaining strictly grounded in Trendly's policies and order data.
 
 ---
 
-## 3. Prompt Iteration History
+# Prompt Strategy
 
-### Iteration 1 (Initial Setup)
-* **Prompt:** *"You are a customer support agent. Answer questions using the policy."*
-* **Issue Observed:** Model was too lenient and attempted to answer general clothing questions outside store policy.
-* **Fix Applied:** Added explicit refusal constraints: *"If a query is not covered by the policy or is outside your scope, state clearly that it is not covered and offer human support."*
+The assistant follows a **strict policy grounding** approach. The complete `trendly_policy.md` is provided as part of the system instructions so the model answers only using Trendly's official policies instead of relying on its general knowledge.
 
-### Iteration 2 (Adding Order Context)
-* **Prompt:** *"Here is the user message and order details."*
-* **Issue Observed:** Model occasionally confused delivery dates with return window eligibility dates.
-* **Fix Applied:** Injected policy rules directly alongside the order context, reminding the model to calculate the 30-day return window from delivered_at rather than placed_at.
+Whenever an Order ID is detected, the corresponding order information from `orders.json` is dynamically injected into the prompt. This allows the assistant to answer questions using both the company policy and the customer's order details.
 
-### Iteration 3 (Edge Case Handling)
-* **Prompt:** Handling edge cases like non-returnable categories (jewellery/innerwear) and final sale items.
-* **Fix Applied:** Embedded Category Rules (Section 2.3) and Final Sale Rules (Section 2.4) directly into system instruction boundaries, forcing refusal on hygiene/category grounds rather than date grounds.
+The objective throughout development was to keep the assistant:
+
+- Accurate
+- Policy-grounded
+- Privacy-aware
+- Helpful
+- Natural to converse with
+
+---
+
+# Guardrails Implemented
+
+Several guardrails were introduced to improve reliability and safety.
+
+## Policy Grounding
+
+The assistant answers only using the Trendly policy and provided order data. If a question is not covered, it clearly states that the information is unavailable and offers to connect the customer with human support.
+
+## Privacy Protection
+
+The assistant never reveals another customer's personal information, order details, addresses, payment information, or any confidential data.
+
+## Financial Safety
+
+The assistant never requests or stores sensitive information such as passwords, CVV numbers, bank account details, or card information.
+
+## Human Escalation
+
+Requests such as lost parcels, policy exceptions, damaged products requiring manual verification, or situations outside the documented policy are redirected to human support.
+
+## Prompt Injection Protection
+
+Instructions such as "Ignore previous instructions", "Pretend you are ChatGPT", or attempts to reveal internal prompts are politely refused while maintaining the original system behaviour.
+
+---
+
+# Prompt Iterations
+
+## Iteration 1 – Initial Prompt
+
+### Goal
+
+Create a basic Trendly customer support assistant.
+
+### Issue
+
+The assistant answered questions outside the scope of Trendly customer support and occasionally behaved like a general AI assistant, responding to personal or emotional conversations instead of politely redirecting users back to Trendly-related support.
+
+### Improvement
+
+Added explicit instructions restricting the assistant to Trendly-related queries only and redirecting unrelated questions to human support when appropriate.
+
+---
+
+## Iteration 2 – Policy & Order Context
+
+### Goal
+
+Improve accuracy using company policy and customer order information.
+
+### Issue
+
+The assistant occasionally confused order dates while determining return eligibility.
+
+### Improvement
+
+Order information from `orders.json` was injected alongside the Trendly policy so return eligibility could be determined using the correct delivery date.
+
+---
+
+## Iteration 3 – Business Rules
+
+### Goal
+
+Handle special policy scenarios correctly.
+
+### Issue
+
+Items such as jewellery, innerwear, footwear, and Final Sale products required category-specific handling.
+
+### Improvement
+
+Additional instructions were added so the assistant correctly follows product-specific return and exchange rules instead of applying general return logic.
+
+---
+
+## Iteration 4 – Conversation Quality
+
+### Goal
+
+Make conversations feel more natural.
+
+### Issue
+
+Responses were often too long, robotic, and overly formal.
+
+### Improvement
+
+The assistant was instructed to:
+
+- Keep responses concise.
+- Ask only for required information.
+- Respond with empathy where appropriate.
+- Maintain conversation context.
+- Handle short replies such as "Yes", "No", or "Okay" naturally.
+
+---
+
+## Iteration 5 – Safety & Edge Cases
+
+### Goal
+
+Improve reliability under unusual situations.
+
+### Issue
+
+Testing exposed prompt injection attempts, privacy attacks, rude users, and unrelated conversations.
+
+### Improvement
+
+Additional guardrails were added for:
+
+- Prompt injection resistance
+- Privacy protection
+- Out-of-scope conversations
+- Human escalation
+- Professional handling of frustrated users
+
+---
+
+# Final Prompt Design
+
+The final prompt was designed around five principles:
+
+- Answer only using Trendly policy and order data.
+- Never invent policies or business rules.
+- Keep responses short, natural, and professional.
+- Protect customer privacy and sensitive information.
+- Escalate to human support whenever required.
+
+---
+
+# AI Tools Used
+
+AI tools were used throughout development as engineering assistants.
+
+They helped with:
+
+- Project planning
+- Prompt engineering
+- Backend debugging
+- Code explanations
+- Conversation refinement
+- Edge-case generation
+- Documentation drafting
+
+All implementation, testing, integration, and final verification were reviewed before submission.
+
+---
+
+# Key Learnings
+
+Developing this project demonstrated that building a reliable AI assistant requires much more than connecting an LLM to an application.
+
+Some of the key learnings were:
+
+- Strong prompt engineering significantly improves response quality.
+- Policy grounding is essential for preventing hallucinations.
+- Maintaining conversation context creates a much more natural user experience.
+- Security and privacy guardrails should be built into the system from the beginning.
+- Thorough edge-case testing is just as important as testing normal customer conversations.

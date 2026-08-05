@@ -61,3 +61,26 @@ chatForm.addEventListener('submit', async (e) => {
         loadingDiv.textContent = 'Unable to reach backend server. Please ensure backend is running at http://localhost:3000.';
     }
 });
+
+// --- NEW CODE FOR NEW CHAT BUTTON ---
+const newChatBtn = document.getElementById('new-chat-btn');
+if (newChatBtn) {
+    newChatBtn.addEventListener('click', async () => {
+        // 1. Reset the UI to just the welcome message
+        chatMessages.innerHTML = `
+            <div class="message bot-message">
+                Hello! 👋 I'm your Trendly Support Assistant. How can I help you with your order or shipping policy today?
+            </div>
+        `;
+
+        // 2. Tell the backend to clear memory
+        try {
+            await fetch('http://localhost:3000/api/clear-chat', {
+                method: 'POST'
+            });
+            console.log("Chat reset successfully.");
+        } catch (error) {
+            console.error("Error clearing chat:", error);
+        }
+    });
+}
